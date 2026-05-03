@@ -44,12 +44,12 @@ MOCK_6522_DDRB2	=	$C482	; 6522 #2 data direction port B
 MOCK_6522_DDRA2	=	$C483	; 6522 #2 data direction port A
 
 ; AY-3-8910 commands on port B
-;						RESET	BDIR	BC1
-MOCK_AY_RESET		=	$0	;	0	0	0
-MOCK_AY_INACTIVE	=	$4	;	1	0	0
-MOCK_AY_READ		=	$5	;	1	0	1
-MOCK_AY_WRITE		=	$6	;	1	1	0
-MOCK_AY_LATCH_ADDR	=	$7	;	1	1	1
+;							BC2_1 RESET	BDIR BC1
+MOCK_AY_RESET		=	$0	;	1	0	0	0
+MOCK_AY_INACTIVE	=	$C	;	1	1	0	0
+MOCK_AY_READ		=	$D	;	1	1	0	1
+MOCK_AY_WRITE		=	$E	;	1	1	1	0
+MOCK_AY_LATCH_ADDR	=	$F	;	1	1	1	1
 
 
 	;========================
@@ -169,61 +169,11 @@ clear_ay_end:
 	; Setup
 	;=============================
 mockingboard_setup_interrupt:
-
-	;===========================
-	; Check for Apple IIc
-	;===========================
-	; it does interrupts differently
-	; SQW - Save old IRQ vectors
-	lda	$c08b			; disable ROM (enable language card)
-	lda	$c08b
-	lda $fffe					; SQW save old address
-	sta old_interrupt_handler
-	lda $ffff
-	sta old_interrupt_handler+1
 	lda $03fe					; SQW save old address
 	sta old_interrupt_handler+2
 	lda $03ff
 	sta old_interrupt_handler+3
 	; SQW - Done saving old vectros
-
-	lda	$FBB3           ; IIe and newer is $06
-	cmp	#6
-	beq	apple_iie_or_newer
-
-	jmp	done_apple_detect
-apple_iie_or_newer:
-	lda	$FBC0		; 0 on a IIc
-	bne	done_apple_detect
-apple_iic:
-	; activate IIc mockingboard?
-	; this might only be necessary to allow detection
-	; I get the impression the Mockingboard 4c activates
-	; when you access any of the 6522 ports in Slot 4
-	lda	#$ff
-
-	; don't bother patching these, IIc mockingboard always slot 4?
-
-	sta	MOCK_6522_DDRA1
-	sta	MOCK_6522_T1CL
-
-	; bypass the firmware interrupt handler
-	; should we do this on IIe too? probably faster
-
-	sei				; disable interrupts
-	lda	$c08b			; disable ROM (enable language card)
-	lda	$c08b
-	lda	#<interrupt_handler
-	sta	$fffe
-	lda	#>interrupt_handler
-	sta	$ffff
-
-	lda	#$EA			; nop out the "lda $45" in the irq hand
-	sta	interrupt_smc
-	sta	interrupt_smc+1
-
-done_apple_detect:
-
 
 	;=========================
 	; Setup Interrupt Handler
@@ -277,12 +227,6 @@ do_quit_player:
 	lda #$7F			; disable interrupts in 6522
 remove_irq_smc1:	
 	sta MOCK_6522_IER
-	lda	$c08b			; disable ROM (enable language card)
-	lda	$c08b
-	lda old_interrupt_handler
-	sta $fffe
-	lda old_interrupt_handler+1
-	sta $ffff
 	lda old_interrupt_handler+2
 	sta $03fe
 	lda old_interrupt_handler+3
