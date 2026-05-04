@@ -1717,12 +1717,11 @@ do_frame:
 
 	; Load up the Frequency Registers
 
-	lda	note_a+NOTE_TONE_L      ; Note A Period L               ; 4
-	sta	AY_REGISTERS+0          ; into R0                       ; 3
-
 	lda	note_a+NOTE_TONE_H	; Note A Period H		; 4
 	sta	AY_REGISTERS+1		; into R1			; 3
-	lda	note_a+NOTE_TONE_L	; Note A Period L		; 4
+
+	lda	note_a+NOTE_TONE_L      ; Note A Period L               ; 4
+	sta	AY_REGISTERS+0          ; into R0                       ; 3
 
 .ifndef PT3_DISABLE_FREQ_CONVERSION
 
@@ -1753,26 +1752,24 @@ convert_177_smc1:
 	adc	AY_REGISTERS+1						; 3
 
 	; divide by 16 to get proper value
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+0						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+0						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+0						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+0						; 5
-	and	#$0f							; 2
 	sta	AY_REGISTERS+1						; 3
 .endif
 
 no_scale_a:
 
-	lda	note_b+NOTE_TONE_L	; Note B Period L		; 4
-	sta	AY_REGISTERS+2		; into R2			; 3
-
 	lda	note_b+NOTE_TONE_H	; Note B Period H		; 4
 	sta	AY_REGISTERS+3		; into R3			; 3
+
 	lda	note_b+NOTE_TONE_L	; Note B Period L		; 4
+	sta	AY_REGISTERS+2		; into R2			; 3
 
 .ifndef PT3_DISABLE_FREQ_CONVERSION
 
@@ -1800,26 +1797,25 @@ convert_177_smc2:
 	adc	AY_REGISTERS+3						; 3
 
 	; divide by 16 to get proper value
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+2						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+2						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+2						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+2						; 5
-	and	#$0f							; 2
 	sta	AY_REGISTERS+3						; 3
 .endif
 
 no_scale_b:
 
-	lda	note_c+NOTE_TONE_L	; Note C Period L		; 4
-	sta	AY_REGISTERS+4		; into R4			; 3
 	lda	note_c+NOTE_TONE_H	; Note C Period H		; 4
 	sta	AY_REGISTERS+5		; into R5			; 3
-	lda	note_c+NOTE_TONE_L	; Note C Period L		; 4
 
+	lda	note_c+NOTE_TONE_L	; Note C Period L		; 4
+	sta	AY_REGISTERS+4		; into R4			; 3
+	
 .ifndef PT3_DISABLE_FREQ_CONVERSION
 
 .ifndef PT3_DISABLE_SWITCHABLE_FREQ_CONVERSION
@@ -1846,15 +1842,14 @@ convert_177_smc3:
 	adc	AY_REGISTERS+5						; 3
 
 	; divide by 16 to get proper value
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+4						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+4						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+4						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+4						; 5
-	and	#$0f							; 2
 	sta	AY_REGISTERS+5						; 3
 .endif
 
@@ -1971,15 +1966,14 @@ convert_177_smc5:
 	adc	AY_REGISTERS+12						; 3
 
 	; divide by 16 to get proper value
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+11						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+11						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+11						; 5
-	ror								; 2
+	lsr								; 2
 	ror	AY_REGISTERS+11						; 5
-	and	#$0f							; 2
 	sta	AY_REGISTERS+12						; 3
 .endif
 
