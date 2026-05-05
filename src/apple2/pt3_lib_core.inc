@@ -1887,11 +1887,10 @@ convert_177_smc4:
 	adc	AY_REGISTERS+6						; 3
 
 	; divide by 16 to get proper value
-	ror								; 2
-	ror								; 2
-	ror								; 2
-	ror								; 2
-	and	#$1f							; 2
+	lsr								; 2
+	lsr								; 2
+	lsr								; 2
+	lsr								; 2
 .endif
 
 no_scale_n:
