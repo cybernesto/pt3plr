@@ -8,7 +8,7 @@ put_letters:
 	; First -- Note A
 	;================
 first_note_a:
-	lda	#$bb
+	lda	#$11
 	sta	sprite_color_smc+1
 
 	ldx	note_a+NOTE_NOTE
@@ -87,7 +87,7 @@ do_sharp_a:
 	;================
 first_note_b:
 
-	lda	#$22
+	lda	#$cc
 	sta	sprite_color_smc+1
 
 	ldx	note_b+NOTE_NOTE
@@ -167,7 +167,7 @@ do_sharp_b:
 	;================
 first_note_c:
 
-	lda	#$33
+	lda	#$66
 	sta	sprite_color_smc+1
 
 	ldx	note_c+NOTE_NOTE
