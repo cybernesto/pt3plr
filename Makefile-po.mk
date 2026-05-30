@@ -1,6 +1,6 @@
-PO = $(NAME).po
-
-CA ?= cadius-145.exe
+CA ?= cadius
+NAME := $(basename $(PROGRAM))
+PO := $(NAME).po
 
 # Unix or Windows
 ifeq ($(shell echo),)
@@ -15,12 +15,15 @@ endif
 
 REMOVES += $(PO)
 
-.PHONY: po
+.PHONY: po emu
 po: $(PO)
 
-$(PO): $(NAME).apple2
+$(PO): $(PROGRAM)
 	$(call CP, apple2/template.po $@)
-	$(CP) $(NAME).apple2 $(NAME).system#FF2000
-	$(CA) addfile $(NAME).po /$(NAME) $(NAME).system#FF2000
-	$(CA) addfolder $(NAME).po /$(NAME)/PT3 PT3
+	$(CP) $(PROGRAM) $(NAME).system#FF2000
+	$(CA) addfile $(PO) /$(NAME) $(NAME).system#FF2000
+	$(CA) addfolder $(PO) /$(NAME)/PT3 PT3
 	$(RM) $(NAME).system#FF2000
+
+emu: $(PO)
+	/opt/homebrew/bin/mame apple2ee -skip_gameinfo -window -nomax -rompath ~/mame/roms -sl4 mockingboard -sl7 cffa2 -hard1 $<

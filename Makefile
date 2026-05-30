@@ -1,4 +1,3 @@
-
 ###############################################################################
 ### Generic Makefile for cc65 projects - full version with abstract options ###
 ### V1.3.0(w) 2010 - 2013 Oliver Schmidt & Patryk "Silver Dream !" Łogiewa  ###
@@ -26,26 +25,17 @@ LIBS    :=
 # Default: none
 CONFIG  :=
 
-# Additional C assembler flags and options.
+# Additional C compiler flags and options.
 # Default: none
-CFLAGS  =
+CFLAGS  = -g
 
 # Additional assembler flags and options.
 # Default: none
-ASFLAGS = --debug-info --listing $@.lst
-
-ifeq ($(PROGRAM),)
-  NAME := $(notdir $(CURDIR))
-else 
-  NAME := $(PROGRAM)
-endif
+ASFLAGS = -g
 
 # Additional linker flags and options.
 # Default: none
-LDFLAGS =
-$(NAME).apple2: LDFLAGS +=
-
-FORMAT ?= po
+LDFLAGS = -g
 
 # Path to the directory containing C and ASM sources.
 # Default: src
@@ -57,23 +47,23 @@ OBJDIR :=
 
 # Command used to run the emulator.
 # Default: depending on target platform. For default (c64) target: x64 -kernal kernal -VICIIdsize -autoload
-EMUCMD :=
-
-# On Windows machines VICE emulators may not be available in the PATH by default.
-# In such case, please set the variable below to point to directory containing
-# VICE emulators. 
-#VICE_HOME := "C:\Program Files\WinVICE-2.2-x86\"
-VICE_HOME :=
+EMUCMD := 
 
 # Optional commands used before starting the emulation process, and after finishing it.
 # Default: none
+# Examples
 #PREEMUCMD := osascript -e "tell application \"System Events\" to set isRunning to (name of processes) contains \"X11.bin\"" -e "if isRunning is true then tell application \"X11\" to activate"
 #PREEMUCMD := osascript -e "tell application \"X11\" to activate"
 #POSTEMUCMD := osascript -e "tell application \"System Events\" to tell process \"X11\" to set visible to false"
 #POSTEMUCMD := osascript -e "tell application \"Terminal\" to activate"
-# PREEMUCMD := $(SED) "s/^al \([[0-9A-F]\+\)\ \./\1 /g" $(NAME).apple2.lbl > $(APPLEWIN_HOME)\A2_USER1.SYM
+PREEMUCMD :=
 POSTEMUCMD :=
 
+# On Windows machines VICE emulators may not be available in the PATH by default.
+# In such case, please set the variable below to point to directory containing
+# VICE emulators.
+#VICE_HOME := "C:\Program Files\WinVICE-2.2-x86\"
+VICE_HOME :=
 
 # Options state file name. You should not need to change this, but for those
 # rare cases when you feel you really need to name it differently - here you are
@@ -84,22 +74,22 @@ STATEFILE := Makefile.options
 ###################################################################################
 
 ###################################################################################
-### Mapping abstract options to the actual assembler, assembler and linker flags ###
-### Predefined assembler, assembler and linker flags, used with abstract options ###
+### Mapping abstract options to the actual compiler, assembler and linker flags ###
+### Predefined compiler, assembler and linker flags, used with abstract options ###
 ### valid for 2.14.x. Consult the documentation of your cc65 version before use ###
 ###################################################################################
 
-# assembler flags used to tell the assembler to optimise for SPEED
+# Compiler flags used to tell the compiler to optimise for SPEED
 define _optspeed_
   CFLAGS += -Oris
 endef
 
-# assembler flags used to tell the assembler to optimise for SIZE
+# Compiler flags used to tell the compiler to optimise for SIZE
 define _optsize_
   CFLAGS += -Or
 endef
 
-# assembler and assembler flags for generating listings
+# Compiler and assembler flags for generating listings
 define _listing_
   CFLAGS += --listing $$(@:.o=.lst)
   ASFLAGS += --listing $$(@:.o=.lst)
@@ -166,7 +156,6 @@ cbm510_EMUCMD := $(VICE_HOME)xcbm2 -model 510 -VICIIdsize -autoload
 cbm610_EMUCMD := $(VICE_HOME)xcbm2 -model 610 -Crtcdsize -autoload
 atari_EMUCMD := atari800 -windowed -xl -pal -nopatchall -run
 cx16_EMUCMD := x16emu -run -prg
-apple2_EMUCMD := $(APPLEWIN_HOME)\AppleWin.exe -d1 
 
 ifeq ($(EMUCMD),)
   EMUCMD = $($(CC65TARGET)_EMUCMD)
@@ -215,16 +204,18 @@ ifeq ($(words $(TARGETLIST)),1)
 # Set PROGRAM to something like 'myprog.c64'.
 override PROGRAM := $(PROGRAM).$(TARGETLIST)
 
+CSOURCES := $(wildcard $(SRCDIR)/*.c)
+CSOURCES += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.c)
+
 # Set SOURCES to something like 'src/foo.c src/bar.s'.
 # Use of assembler files with names ending differently than .s is deprecated!
-SOURCES := $(wildcard $(SRCDIR)/*.c)
+SOURCES := $(CSOURCES)
 SOURCES += $(wildcard $(SRCDIR)/*.s)
 SOURCES += $(wildcard $(SRCDIR)/*.asm)
 SOURCES += $(wildcard $(SRCDIR)/*.a65)
 
 # Add to SOURCES something like 'src/c64/me.c src/c64/too.s'.
 # Use of assembler files with names ending differently than .s is deprecated!
-SOURCES += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.c)
 SOURCES += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.s)
 SOURCES += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.asm)
 SOURCES += $(wildcard $(SRCDIR)/$(TARGETLIST)/*.a65)
@@ -308,16 +299,12 @@ $(TARGETOBJDIR)/%.o: %.asm | $(TARGETOBJDIR)
 
 vpath %.a65 $(SRCDIR)/$(TARGETLIST) $(SRCDIR)
 
-$(TARGETOBJDIR)/%.o: %.a65 | $(TARGETOBJDIR)
-	cl65 -t $(CC65TARGET) -c --create-dep $(@:.o=.d) $(ASFLAGS) -o $@ $<
-
 $(PROGRAM): $(CONFIG) $(OBJECTS) $(LIBS)
 	cl65 -t $(CC65TARGET) $(LDFLAGS) -o $@ $(patsubst %.cfg,-C %.cfg,$^)
 
 test: $(PROGRAM)
 	$(PREEMUCMD)
-# $(EMUCMD) $(subst .apple2,,$<).$(FORMAT)
-	$(EMUCMD) 
+	$(EMUCMD) $<
 	$(POSTEMUCMD)
 
 clean:
